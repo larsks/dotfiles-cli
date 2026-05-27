@@ -1,0 +1,70 @@
+#!/bin/bash
+
+DOTFILES_GIT_PATH=${DOTFILES_GIT_PATH:-git}
+DOTFILES_DIR=${DOTFILES_DIR:-"$HOME/dotfiles"}
+DOTFILES_DATE_FORMAT=${DOTFILES_DATE_FORMAT:-"%Y-%m-%d %H:%M:%S"}
+
+set -o nounset
+
+log() {
+  local level
+  local date
+  local exename
+
+  exename=${0##*/}
+
+  level=$1
+  shift
+  date=$(date "+${DOTFILES_DATE_FORMAT}")
+  printf "%s %s [%s] %s\n" "$date" "$exename" "$level" "$*"
+}
+
+log_info() {
+  log "INFO" "$*"
+}
+
+log_error() {
+  log "ERROR" "$*"
+}
+
+die() {
+  log_error "$*"
+  exit 1
+}
+
+_dotfiles() {
+  ${_exec:-} "$DOTFILES_GIT_PATH" --git-dir="$DOTFILES_DIR" --work-tree="$HOME" "$@"
+}
+
+if ! [[ -d "$DOTFILES_DIR" ]]; then
+  if [[ "${1:-}" == init ]]; then
+    url=${2:-${DOTFILES_REPOSITORY_URL}}
+    if [[ -n "$url" ]]; then
+      log_info "cloning dotfiles directory \"$DOTFILES_DIR\" from \"$url\""
+      tmpdir=$(mktemp -d "$HOME/.dotfiles.tmpXXXXXX")
+      trap 'rm -rf "$tmpdir"' EXIT
+
+      # By cloning with --separate-git-dir into a temporary directory (and
+      # deleting the temporary directory) instead of using --bare, we get
+      # git to set up the remote branch configuration for us.
+      git clone "$url" --separate-git-dir "$DOTFILES_DIR" "$tmpdir" ||
+        die "failed to clone dotfiles directory from \"$url\""
+      rm -rf "$tmpdir"
+
+      _dotfiles config --local core.worktree "$HOME" ||
+        die "failed to configure dotfiles directory"
+    else
+      log_info "creating dotfiles directory \"$DOTFILES_DIR\""
+      git init --bare "$DOTFILES_DIR" ||
+        die "failed to initialize dotfiles directory \"$DOTFILES_DIR\""
+    fi
+
+    # Don't show untracked files by default (because there will be many of them).
+    _dotfiles config --local status.showUntrackedFiles no ||
+      die "failed to configure dotfiles directory"
+  else
+    die "no dotfiles directory (use 'dotfiles init' to create one)"
+  fi
+fi
+
+_exec="exec" _dotfiles "$@"
