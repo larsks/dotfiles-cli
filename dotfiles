@@ -75,6 +75,13 @@ init)
   init_dotfiles_dir "$@"
   exit
   ;;
+run)
+  shift
+  GIT_DIR=$DOTFILES_DIR
+  GIT_WORK_TREE=$HOME
+  export GIT_DIR GIT_WORK_TREE
+  exec "$@"
+  ;;
 esac
 
 _exec="exec" _dotfiles "$@"
