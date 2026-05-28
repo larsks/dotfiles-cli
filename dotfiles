@@ -82,7 +82,7 @@ show_version() {
   printf "%s version %s (%s)\n" "${0##*/}" "$DOTFILES_VERSION" "$DOTFILES_RELEASE_DATE"
 }
 
-case "$1" in
+case "${1:-}" in
 init)
   shift
   init_dotfiles_dir "$@"
