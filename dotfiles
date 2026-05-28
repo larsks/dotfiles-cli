@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DOTFILES_VERSION="dev"
+DOTFILES_RELEASE_DATE="2026-05-28"
+
 DOTFILES_GIT_PATH=${DOTFILES_GIT_PATH:-git}
 DOTFILES_DIR=${DOTFILES_DIR:-"$HOME/dotfiles"}
 DOTFILES_DATE_FORMAT=${DOTFILES_DATE_FORMAT:-"%Y-%m-%d %H:%M:%S"}
@@ -69,6 +72,17 @@ init_dotfiles_dir() {
     die "failed to configure dotfiles directory"
 }
 
+run_shell_command() {
+  GIT_DIR=$DOTFILES_DIR
+  GIT_WORK_TREE=$HOME
+  export GIT_DIR GIT_WORK_TREE
+  exec "$@"
+}
+
+show_version() {
+  printf "%s version %s (%s)\n" "${0##*/}" "$DOTFILES_VERSION" "$DOTFILES_RELEASE_DATE"
+}
+
 case "$1" in
 init)
   shift
@@ -77,10 +91,12 @@ init)
   ;;
 run)
   shift
-  GIT_DIR=$DOTFILES_DIR
-  GIT_WORK_TREE=$HOME
-  export GIT_DIR GIT_WORK_TREE
-  exec "$@"
+  run_shell_command "$@"
+  exit 1
+  ;;
+version)
+  show_version
+  exit
   ;;
 esac
 
