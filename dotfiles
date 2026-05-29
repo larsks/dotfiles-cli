@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DOTFILES_VERSION="0.2.1"
+DOTFILES_COMMIT="unknown"
 DOTFILES_RELEASE_DATE="2026-05-28"
 
 DOTFILES_GIT_PATH=${DOTFILES_GIT_PATH:-git}
@@ -94,7 +95,7 @@ run_shell_command() {
 }
 
 show_version() {
-  printf "%s version %s (%s)\n" "${0##*/}" "$DOTFILES_VERSION" "$DOTFILES_RELEASE_DATE"
+  printf "%s version %s (%s) on %s\n" "${0##*/}" "$DOTFILES_VERSION" "$DOTFILES_COMMIT" "$DOTFILES_RELEASE_DATE"
 }
 
 case "${1:-}" in
