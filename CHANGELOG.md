@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.3.0 (2026-05-28)
+
+### Feat
+
+- add reconfig command and untracked alias
+
+### Fix
+
+- Include commit hash in version output
+
 ## v0.2.1 (2026-05-28)
 
 ### Fix
