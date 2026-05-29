@@ -66,9 +66,24 @@ init_dotfiles_dir() {
       die "failed to initialize dotfiles directory \"$DOTFILES_DIR\""
   fi
 
+  config_dotfiles_dir
+}
+
+config_dotfiles_dir() {
   # Don't show untracked files by default (because there will be many of them).
   _dotfiles config --local status.showUntrackedFiles no ||
-    die "failed to configure dotfiles directory"
+    die "failed to configure dotfiles repository"
+
+  declare -A aliases
+  aliases=(
+    [untracked]="status -unormal"
+  )
+
+  for alias in "${!aliases[@]}"; do
+    # Add some useful aliases
+    _dotfiles config --local "alias.${alias}" "${aliases[$alias]}" ||
+      die "failed to add alias \"$alias\" to dotfiles repository"
+  done
 }
 
 run_shell_command() {
@@ -95,6 +110,10 @@ run)
   ;;
 version)
   show_version
+  exit
+  ;;
+reconfig)
+  config_dotfiles_dir
   exit
   ;;
 esac
